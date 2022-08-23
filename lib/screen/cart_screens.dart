@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/providers/cart.dart' show Cart;
 import 'package:provider/provider.dart';
-import 'package:my_shop/widgets/cart_item.dart';
+
+import '../providers/cart.dart' show Cart;
+import '../widgets/cart_item.dart';
+import '../providers/orders.dart';
 
 class CartScreen extends StatelessWidget {
-  static const routName = '/cart';
-
-  CartScreen({Key? key}) : super(key: key);
+  static const routeName = '/cart';
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +16,14 @@ class CartScreen extends StatelessWidget {
         title: Text('Your Cart'),
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           Card(
             margin: EdgeInsets.all(15),
             child: Padding(
               padding: EdgeInsets.all(8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                children: <Widget>[
                   Text(
                     'Total',
                     style: TextStyle(fontSize: 20),
@@ -31,37 +31,41 @@ class CartScreen extends StatelessWidget {
                   Spacer(),
                   Chip(
                     label: Text(
-                      '\$${cart.totalAmount.toString()}',
+                      '\$${cart.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
-                          color: Theme.of(context)
-                              .primaryTextTheme
-                              .subtitle1
-                              ?.color),
+                        color: Theme.of(context).primaryTextTheme.titleLarge?.color,
+                      ),
                     ),
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
-                    onPressed: () {},
                     child: Text('ORDER NOW'),
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                        cart.items.values.toList(),
+                        cart.totalAmount,
+                      );
+                      cart.clear();
+                    },
                     textColor: Theme.of(context).primaryColor,
                   )
                 ],
               ),
             ),
           ),
-          SizedBox(
-            height: 10,
-          ),
+          SizedBox(height: 10),
           Expanded(
-              child: ListView.builder(
-            itemBuilder: (ctx, i) => CartItem(
-                id: cart.items.values.toList()[i].id,
-                productId: cart.items.keys.toList()[i],
-                title: cart.items.values.toList()[i].title,
-                quantity: cart.items.values.toList()[i].quantity,
-                price: cart.items.values.toList()[i].price),
-            itemCount: cart.items.length,
-          ))
+            child: ListView.builder(
+              itemCount: cart.items.length,
+              itemBuilder: (ctx, i) => CartItem(
+                cart.items.values.toList()[i].id,
+                cart.items.keys.toList()[i],
+                cart.items.values.toList()[i].price,
+                cart.items.values.toList()[i].quantity,
+                cart.items.values.toList()[i].title,
+              ),
+            ),
+          )
         ],
       ),
     );
